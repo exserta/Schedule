@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Table/title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #1e1e2e; color: #fff; font-family: 'Comfortaa', sans-serif; }
+        .schedule-container { display: grid; grid-template-columns: 80px repeat(5, 1fr); gap: 10px; }
+        .day { background: #2e2e3e; padding: 10px; border-radius: 10px; }
+        .hour { border-bottom: 1px solid #444; padding: 5px; cursor: pointer; }
+        .event { padding: 5px; border-radius: 5px; margin-top: 5px; transition: 0.3s; cursor: pointer; }
+        .event:hover { opacity: 0.8; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #333; padding: 20px; border-radius: 10px; display: none; }
+        .text-gray-400 { color: #fff !important; }
+    </style>
+</head>
+<body>
+    <div class="p-6">
+        <h1 class="text-3xl text-center mb-2">Weekly Schedule</h1>
+        <p class="text-center text-gray-400 mb-6">Screenshot your schedule before closing.</p>
+        <div class="schedule-container">
+            <div></div>
+            <div class="day">Monday</div>
+            <div class="day">Tuesday</div>
+            <div class="day">Wednesday</div>
+            <div class="day">Thursday</div>
+            <div class="day">Friday</div>
+            
+            <script>
+                let hours = ['8:45', '9:45', '10:30', '11:30', '12:15', '13:15', '14:00', '15:00', '15:45', '16:45', '17:30', '18:30', '19:15', '20:00'];
+                let container = document.querySelector('.schedule-container');
+                let currentSlot = null;
+                
+                hours.forEach(hour => {
+                    let timeColumn = document.createElement('div');
+                    timeColumn.innerText = hour;
+                    timeColumn.className = 'hour text-gray-300';
+                    container.appendChild(timeColumn);
+                    
+                    for (let i = 0; i < 5; i++) {
+                        let slot = document.createElement('div');
+                        slot.className = 'hour';
+                        slot.addEventListener('click', () => openModal(slot));
+                        container.appendChild(slot);
+                    }
+                });
+                
+                function openModal(slot) {
+                    currentSlot = slot;
+                    document.getElementById('event-modal').style.display = 'block';
+                    document.getElementById('title').value = slot.dataset.title || '';
+                    document.getElementById('subtitle').value = slot.dataset.subtitle || '';
+                    document.getElementById('subdesc').value = slot.dataset.subdesc || '';
+                    document.getElementById('color').value = slot.dataset.color || randomColor();
+                }
+                
+                function saveEvent() {
+                    let title = document.getElementById('title').value;
+                    let subtitle = document.getElementById('subtitle').value;
+                    let subdesc = document.getElementById('subdesc').value;
+                    let color = document.getElementById('color').value;
+                    
+                    if (title) {
+                        let event = document.createElement('div');
+                        event.className = 'event';
+                        event.style.backgroundColor = color;
+                        event.innerHTML = `<strong>${title}</strong><br><small>${subtitle}</small><br><small class='text-gray-400'>${subdesc}</small>`;
+                        event.onclick = () => openModal(event.parentElement);
+                        
+                        currentSlot.innerHTML = '';
+                        currentSlot.appendChild(event);
+                        currentSlot.dataset.title = title;
+                        currentSlot.dataset.subtitle = subtitle;
+                        currentSlot.dataset.subdesc = subdesc;
+                        currentSlot.dataset.color = color;
+                    }
+                    closeModal();
+                }
+                
+                function deleteEvent() {
+                    if (currentSlot) {
+                        currentSlot.innerHTML = '';
+                        delete currentSlot.dataset.title;
+                        delete currentSlot.dataset.subtitle;
+                        delete currentSlot.dataset.subdesc;
+                        delete currentSlot.dataset.color;
+                    }
+                    closeModal();
+                }
+                
+                function closeModal() {
+                    document.getElementById('event-modal').style.display = 'none';
+                }
+                
+                function randomColor() {
+                    return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+                }
+            </script>
+        </div>
+    </div>
+    
+    <div id="event-modal" class="modal">
+        <h2 class="text-lg">Create/Edit Event</h2>
+        <input id="title" type="text" placeholder="Title" class="block p-2 m-2 w-full bg-gray-700 rounded">
+        <input id="subtitle" type="text" placeholder="Subtitle" class="block p-2 m-2 w-full bg-gray-700 rounded">
+        <input id="subdesc" type="text" placeholder="Sub-desc" class="block p-2 m-2 w-full bg-gray-700 rounded">
+        <input id="color" type="color" class="block p-2 m-2 w-full rounded">
+        <button onclick="saveEvent()" class="bg-purple-500 hover:bg-purple-600 text-white p-2 rounded">Save</button>
+        <button onclick="deleteEvent()" class="bg-red-500 hover:bg-red-600 text-white p-2 rounded">Delete</button>
+        <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white p-2 rounded">Cancel</button>
+    </div>
+</body>
+</html>
